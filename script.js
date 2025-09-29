@@ -1,54 +1,46 @@
-// Get the tbody where the results will appear
 const output = document.getElementById("output");
 
-
+// Step 1: show the default "Loading..." row
 const loadingRow = document.createElement("tr");
-loadingRow.id = "loading-row";
-loadingRow.innerHTML = `<td colspan="2">Loading...</td>`;
+loadingRow.innerHTML = `<td colspan="2" class="text-center">Loading...</td>`;
 output.appendChild(loadingRow);
 
-
-function createTimedPromise(index) {
-  const timeInSeconds = (Math.random() * 2 + 1).toFixed(3); // 1 to 3 seconds
-
+// Step 2: function to create a promise with random delay between 1 and 3 seconds
+function createRandomPromise(promiseNumber) {
   return new Promise((resolve) => {
+    const delay = Math.random() * 2000 + 1000; // 1000ms to 3000ms
+    const startTime = performance.now();
+
     setTimeout(() => {
-      resolve({ name: `Promise ${index}`, time: Number(timeInSeconds) });
-    }, timeInSeconds * 1000);
+      const endTime = performance.now();
+      const timeTaken = ((endTime - startTime) / 1000).toFixed(3); // seconds with 3 decimals
+      resolve({ name: `Promise ${promiseNumber}`, time: timeTaken });
+    }, delay);
   });
 }
 
-
+// Step 3: create 3 promises
 const promises = [
-  createTimedPromise(1),
-  createTimedPromise(2),
-  createTimedPromise(3),
+  createRandomPromise(1),
+  createRandomPromise(2),
+  createRandomPromise(3),
 ];
 
-// Track total time using performance.now()
-const startTime = performance.now();
-
+// Step 4: wait for all promises to resolve
 Promise.all(promises).then((results) => {
-  const endTime = performance.now();
-  const totalTime = ((endTime - startTime) / 1000).toFixed(3);
-
- 
+  // Remove "Loading..." row
   output.innerHTML = "";
 
-
-  results.forEach((result) => {
+  // Populate each promise result
+  results.forEach((res) => {
     const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${result.name}</td>
-      <td>${result.time.toFixed(3)}</td>
-    `;
+    row.innerHTML = `<td>${res.name}</td><td>${res.time}</td>`;
     output.appendChild(row);
   });
 
+  // Calculate total (longest time)
+  const totalTime = Math.max(...results.map((r) => parseFloat(r.time))).toFixed(3);
   const totalRow = document.createElement("tr");
-  totalRow.innerHTML = `
-    <td>Total</td>
-    <td>${totalTime}</td>
-  `;
+  totalRow.innerHTML = `<td><b>Total</b></td><td>${totalTime}</td>`;
   output.appendChild(totalRow);
 });
